@@ -41,15 +41,22 @@ st.set_page_config(page_title="CalMate", page_icon="🍽️")
 
 st.header("Calmate - Your Calorie Advisor App")
 
-# Allow user to either upload an image or capture using the camera
-uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-camera_file = st.camera_input("Or take a photo with your camera")
-
-image = None
-
-# Initialize session state for the response if not already initialized
+# Initialize session states for camera and response if not already initialized
 if 'response' not in st.session_state:
     st.session_state.response = None
+if 'show_camera' not in st.session_state:
+    st.session_state.show_camera = False
+
+# File uploader for uploaded images
+uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+image = None
+
+# Button to toggle the camera input visibility
+if st.button("Open Camera"):
+    st.session_state.show_camera = not st.session_state.show_camera
+
+# Display the camera input only if show_camera flag is True
+camera_file = st.camera_input("Capture an image with your camera") if st.session_state.show_camera else None
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
@@ -89,8 +96,8 @@ if submit and (uploaded_file or camera_file):
 page_bg_gradient_with_image = '''
 <style>
 [data-testid="stAppViewContainer"] {
-    background-image: url('https://img.freepik.com/premium-photo/fresh-fruits-vegetables-grey-background-healthy-eating-concept-flat-lay-copy-space_1101366-601.jpg?semt=ais_hybrid'), linear-gradient(270deg, #a8e063, #f76b1c, #f5d76e, #a8e063);
-    background-size: cover, 800% 800%;  /* The first 'cover' is for the image, the second part for the gradient */
+    background-image: url('https://img.freepik.com/premium-photo/fresh-fruits-vegetables-grey-background-healthy-eating-concept-flat-lay-copy-space_1101366-601.jpg?semt=ais_hybrid'), linear-gradient(270deg, #a8e063, #f76b1c, #a8e063);
+    background-size: cover, 800% 800%;
     background-position: center, 0% 50%;
     animation: moveGradient 12s ease infinite;
 }
