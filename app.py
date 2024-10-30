@@ -37,7 +37,7 @@ def image_image_setup(uploaded_file):
         raise FileNotFoundError("No file uploaded")
 
 # Creating the Streamlit app (Front-end Setup)
-st.set_page_config(page_title="CalMate", page_icon="🍽️")
+#st.set_page_config(page_title="CalMate", page_icon="🍽️")
 
 st.header("Calmate - Your Calorie Advisor App")
 
