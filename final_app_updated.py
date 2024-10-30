@@ -9,8 +9,8 @@ page = st.sidebar.selectbox("Select a page", ("Calmate", "Dishify"))
 
 # Display selected page content
 if page == "Calmate":
-    from projects import CalMate as calMate
+    from app import CalMate as calMate
     calMate.main()
 elif page == "Dishify":
-    from projects import dishify as dishify
+    from app import dishify as dishify
     dishify.main()
