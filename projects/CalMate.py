@@ -39,7 +39,12 @@ def image_image_setup(uploaded_file):
 # Setting up Streamlit App (Front-end Setup)
 st.set_page_config(page_title="CalMate", page_icon="🍽️")
 
+# Load and display the logo in the header
+logo = Image.open("CalMate.png")
+st.image(logo, width=100)
+
 st.header("Calmate - Your Calorie Advisor App")
+
 
 # Initialize session states for camera and response if not already initialized
 if 'response' not in st.session_state:
