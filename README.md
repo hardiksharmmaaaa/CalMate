@@ -33,6 +33,9 @@ Calmate is your AI-powered nutritionist:
 - **gTTS (Google Text-to-Speech)**: Enables audio playback for the cooking instructions.
 - **PIL (Python Imaging Library)**: Manages image handling and processing.
 
+Dishify UI
+![image](https://github.com/user-attachments/assets/0ee7b163-73ae-433c-a6fe-7f44b7fbf88c)
+
 ## Getting Started
 
 1. Clone the repository:
