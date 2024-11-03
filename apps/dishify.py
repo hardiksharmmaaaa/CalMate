@@ -43,15 +43,14 @@ def image_image_setup(uploaded_file):
 prompt = """
 Imagine you are a personal chef providing guidance on creating a specific dish. When someone asks you how to make a dish, respond by including:
 
-Dish Name: State the name of the dish.
-Ingredients List: List all required ingredients, including precise measurements.
-Step-by-Step Procedure: Provide detailed, sequential instructions on how to prepare the dish. Start each step with a clear action verb (e.g., chop, mix, heat). Ensure the steps are concise, easy to follow, and written for a beginner.
-Example Prompt:
+Whenever given a dish name (e.g., ‘Spaghetti Carbonara’) followed by quantity, provide a detailed recipe including:
 
-'How do I make Spaghetti Carbonara?'
+Dish Name: Sure, lets Cook this , Start with the dish name provided.
+Ingredients: List precise quantities for each ingredient based on the given quantity.
+Procedure: Outline a clear, beginner-friendly procedure with steps separated by line breaks.
+Example Input: ‘Spaghetti Carbonara, for 2 people’
 
 Desired Response:
-
 Dish: Spaghetti Carbonara
 
 Ingredients:
