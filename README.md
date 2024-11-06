@@ -66,8 +66,8 @@ Have feedback or suggestions? Contact us
 
 Thankyou 
 
-Hardik Sharma
-hardiksharmaa007@gmail.com
+- Hardik Sharma
+- hardiksharmaa007@gmail.com
 
 ---
 
