@@ -55,6 +55,8 @@ Calmate is your AI-powered nutritionist:
     ```
 4. Ensure your Google Gemini API key is set in your environment variables (`GEMINI_API_KEY`).
 
+5. You can also checkout the Testing images for testing the Calmate and Dishify Apps to check the working.
+
 ## Future Enhancements
 - **Recipe Suggestions**: Based on the user’s dietary preferences.
 - **Food Recognition**: Automatically identify food items without manual input.
