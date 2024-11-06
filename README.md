@@ -64,5 +64,10 @@ Calmate is your AI-powered nutritionist:
 ## Feedback
 Have feedback or suggestions? Contact us 
 
+Thankyou 
+
+Hardik Sharma
+hardiksharmaa007@gmail.com
+
 ---
 
