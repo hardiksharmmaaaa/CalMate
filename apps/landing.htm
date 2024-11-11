@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Nutritionist App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #f0f0f0;
+        }
+        .container {
+            text-align: center;
+        }
+        .title {
+            font-size: 2.5em;
+            color: #333;
+        }
+        .subtitle {
+            font-size: 1.2em;
+            margin-top: 0.5em;
+            color: #555;
+        }
+        .button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            background-color: #0073e6;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #005bb5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Welcome to Your Personal Nutritionist</h1>
+        <p class="subtitle">Get tailored nutritional advice and meal suggestions</p>
+        <button onclick="window.parent.postMessage('login', '*')" class="button">Get Started</button>
+    </div>
+</body>
+</html>

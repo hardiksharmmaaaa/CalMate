@@ -57,8 +57,8 @@ def main():
     #st.set_page_config(page_title="CalMate", page_icon="🍽️")
 
     # Load and display the logo in the header
-    logo = Image.open("CalMate_bg.png")
-    st.image(logo, width=100)
+    logo = Image.open("CalMate-bg.png")
+    st.image(logo, width=350)
 
     st.header("Calmate - Your Calorie Advisor App")
 
