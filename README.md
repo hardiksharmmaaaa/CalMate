@@ -69,7 +69,5 @@ Thankyou
 - Hardik Sharma
 - hardiksharmaa007@gmail.com
 
-Made with Love ❤️
 
----
 
