@@ -6,7 +6,6 @@ from PIL import Image
 from gtts import gTTS
 from io import BytesIO
 import base64
-import sqlite3
 
 # Loading all the environment variables
 load_dotenv()
@@ -14,32 +13,7 @@ load_dotenv()
 # Configuring Google Gemini API
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-# Database setup
-def create_database():
-    conn = sqlite3.connect("recipes.db")
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS ingredients (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            dish_name TEXT NOT NULL,
-            ingredient_name TEXT NOT NULL,
-            quantity TEXT NOT NULL
-        )
-    ''')
-    conn.commit()
-    conn.close()
-
-def store_ingredients(dish_name, ingredients):
-    conn = sqlite3.connect("recipes.db")
-    cursor = conn.cursor()
-    for ingredient in ingredients:
-        cursor.execute('''
-            INSERT INTO ingredients (dish_name, ingredient_name, quantity)
-            VALUES (?, ?, ?)
-        ''', (dish_name, ingredient['name'], ingredient['quantity']))
-    conn.commit()
-    conn.close()
-
+# Function to get response from Google Gemini API
 def get_gemini_response(prompt, image=None):
     model = genai.GenerativeModel("gemini-1.5-pro")
     if image:
@@ -48,9 +22,13 @@ def get_gemini_response(prompt, image=None):
         response = model.generate_content([prompt])
     return response.text
 
+# Function to handle the uploaded image
 def image_image_setup(uploaded_file):
     if uploaded_file is not None:
+        # Reading the file into bytes
         bytes_data = uploaded_file.getvalue()
+
+        # Formatting the image for Google Gemini Pro
         image_parts = [
             {
                 "mime_type": uploaded_file.type,
@@ -60,20 +38,8 @@ def image_image_setup(uploaded_file):
         return image_parts
     else:
         return None
-
-def parse_ingredients(response):
-    ingredients = []
-    lines = response.split('\n')
-    for line in lines:
-        if ':' in line and line.lower().startswith('ingredients:'):
-            continue
-        if line.strip() and ':' in line:
-            parts = line.split(':', 1)
-            ingredient_name = parts[0].strip()
-            quantity = parts[1].strip()
-            ingredients.append({"name": ingredient_name, "quantity": quantity})
-    return ingredients
-
+    
+# Creating the base prompt
 prompt = """
 Imagine you are a personal chef providing guidance on creating a specific dish. When someone asks you how to make a dish, respond by including:
 
@@ -114,6 +80,99 @@ Note that the steps should be seperated by the next line
 Repeat this structure for all dishes, ensuring the response includes clear ingredients and easy-to-follow instructions."
 """
 
+
+def main():
+    # Setting up Streamlit App (Front-end Setup)
+    # st.set_page_config(page_title="Dishify", page_icon="👨‍🍳")
+
+    # Load and display the logo in the header
+    logo = Image.open("chef.png")
+    st.image(logo, width=100)
+
+    st.header("Dishify - Your Personal Chef, One Chat Away!")
+
+    # Input for text prompt
+    user_input = st.text_input("Enter dish or ingredient query here:", key="user_input")
+
+    # File uploader for uploaded images
+    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+
+    # Display image if uploaded
+    if uploaded_file:
+        image = Image.open(uploaded_file)
+        st.image(image, caption="Uploaded Image", use_column_width=True)
+
+    # Submit button
+    submit = st.button("Generate Recipe")
+
+    # Generate response based on input
+    if submit:
+        if uploaded_file:
+            # Process the image and use both prompt and image to generate response
+            image_data = image_image_setup(uploaded_file)
+            st.session_state.response = get_gemini_response(prompt, image_data)
+        elif user_input:
+            # Use user_input as the prompt if no image is uploaded
+            st.session_state.response = get_gemini_response(user_input)
+        else:
+            st.warning("Please provide either an image or a text query.")
+
+    # Display the response
+    if st.session_state.get("response"):
+        st.header("The Response is:")
+        st.write(st.session_state.response)
+
+    # Background styling with gradient and image
+
+    page_bg_gradient_with_image = '''
+    <style>
+    [data-testid="stAppViewContainer"] {
+        background-image: url('https://img.freepik.com/premium-photo/fresh-fruits-vegetables-grey-background-healthy-eating-concept-flat-lay-copy-space_1101366-601.jpg?semt=ais_hybrid'), linear-gradient(270deg, #a8e063, #f76b1c, #a8e063);
+        background-size: cover, 800% 800%;
+        background-position: center, 0% 50%;
+        animation: moveGradient 12s ease infinite;
+    }
+    @keyframes moveGradient {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    </style>
+    '''
+
+    st.markdown(page_bg_gradient_with_image, unsafe_allow_html=True)
+
+    # Function to generate speech from text using gTTS
+    def text_to_speech(text):
+        tts = gTTS(text)
+        audio_file = BytesIO()
+        tts.write_to_fp(audio_file)
+        audio_file.seek(0)
+        return audio_file
+
+    # Function to play the audio in Streamlit
+    def play_audio(audio_data):
+        audio_bytes = audio_data.read()
+        audio_b64 = base64.b64encode(audio_bytes).decode()
+        st.audio(f"data:audio/mp3;base64,{audio_b64}", format="audio/mp3")
+
+    # Only show 'Play DIY' button if response is available
+    if st.session_state.get("response"):
+        if st.button("Play The DIY"):
+            audio_data = text_to_speech(st.session_state.response)
+            play_audio(audio_data)
+
+if __name__ == "__main__":
+    main()
+
+def retrieve_ingredients():
+    conn = sqlite3.connect("recipes.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT dish_name, ingredient_name, quantity FROM ingredients")
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
 def main():
     # Set up the database
     create_database()
@@ -131,6 +190,7 @@ def main():
         st.image(image, caption="Uploaded Image", use_column_width=True)
 
     submit = st.button("Generate Recipe")
+    view_database = st.button("View Stored Ingredients")
 
     if submit:
         if uploaded_file:
@@ -152,5 +212,12 @@ def main():
         store_ingredients(dish_name, ingredients)
         st.success(f"Ingredients for '{dish_name}' have been stored in the database.")
 
-if __name__ == "__main__":
-    main()
+    if view_database:
+        # Fetch and display the database contents
+        data = retrieve_ingredients()
+        if data:
+            st.header("Stored Ingredients:")
+            for row in data:
+                st.write(f"Dish: {row[0]}, Ingredient: {row[1]}, Quantity: {row[2]}")
+        else:
+            st.info("No ingredients found in the database.")
