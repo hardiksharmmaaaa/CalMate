@@ -1,6 +1,10 @@
 # final_app.py
 import streamlit as st
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 717cab16 (Commit changes)
 # Set the page config at the start of final_app.py
 st.set_page_config(page_title="Calmate and Dishify App", page_icon="🍽️")
 

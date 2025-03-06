@@ -1,4 +1,9 @@
 python-dotenv
 streamlit 
 gtts
+<<<<<<< HEAD
 google.generativeai
+=======
+google.generativeai
+openai
+>>>>>>> 717cab16 (Commit changes)

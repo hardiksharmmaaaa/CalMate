@@ -98,6 +98,7 @@ def main():
         st.write(st.session_state.response)  # Display the response
 
     # Background styling with gradient and image
+<<<<<<< HEAD
     page_bg_gradient_with_image = '''
     <style>
     [data-testid="stAppViewContainer"] {
@@ -115,6 +116,39 @@ def main():
     }
     </style>
     '''
+=======
+    page_bg_gradient_with_image = """
+<style>
+[data-testid="stAppViewContainer"] {
+    position: relative;
+    background-image: url('https://img.freepik.com/premium-photo/fresh-fruits-vegetables-grey-background-healthy-eating-concept-flat-lay-copy-space_1101366-601.jpg?semt=ais_hybrid');
+    background-size: cover;
+    background-position: center;
+}
+
+[data-testid="stAppViewContainer"]::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(270deg, #a8e063, #f76b1c, #a8e063);
+    background-size: 400% 400%;
+    z-index: -1;
+    opacity: 0.7;
+    animation: moveGradient 8s ease infinite;
+}
+
+/* Define the gradient animation */
+@keyframes moveGradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+</style>
+"""
+>>>>>>> 717cab16 (Commit changes)
 
     st.markdown(page_bg_gradient_with_image, unsafe_allow_html=True)
 
