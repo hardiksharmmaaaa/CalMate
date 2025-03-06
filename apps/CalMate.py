@@ -98,7 +98,6 @@ def main():
         st.write(st.session_state.response)  # Display the response
 
     # Background styling with gradient and image
-<<<<<<< HEAD
     page_bg_gradient_with_image = '''
     <style>
     [data-testid="stAppViewContainer"] {
@@ -116,7 +115,6 @@ def main():
     }
     </style>
     '''
-=======
     page_bg_gradient_with_image = """
 <style>
 [data-testid="stAppViewContainer"] {
@@ -148,8 +146,6 @@ def main():
 }
 </style>
 """
->>>>>>> 717cab16 (Commit changes)
-
     st.markdown(page_bg_gradient_with_image, unsafe_allow_html=True)
 
     # Function to generate speech from text using gTTS
