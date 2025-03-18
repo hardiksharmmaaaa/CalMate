@@ -6,124 +6,77 @@ from PIL import Image
 from gtts import gTTS
 from io import BytesIO
 import base64
+import time
+import threading
 
-# Loading all the environment variables
+# Load environment variables
 load_dotenv()
 
-# Configuring Google Gemini API
+# Configure Google Gemini API
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+# Initialize session state variables
+if "response" not in st.session_state:
+    st.session_state["response"] = ""
+
+if "audio" not in st.session_state:
+    st.session_state["audio"] = None
+
+if "highlighted_text" not in st.session_state:
+    st.session_state["highlighted_text"] = ""
+
+if "play_tts" not in st.session_state:
+    st.session_state["play_tts"] = False
 
 # Function to get response from Google Gemini API
 def get_gemini_response(prompt, image=None):
     model = genai.GenerativeModel("gemini-1.5-pro")
     if image:
-        response = model.generate_content([prompt, image[0]])
+        response = model.generate_content([prompt, image[0]], stream=True)
     else:
-        response = model.generate_content([prompt])
-    return response.text
-
-# Function to handle the uploaded image
-def image_image_setup(uploaded_file):
-    if uploaded_file is not None:
-        # Reading the file into bytes
-        bytes_data = uploaded_file.getvalue()
-
-        # Formatting the image for Google Gemini Pro
-        image_parts = [
-            {
-                "mime_type": uploaded_file.type,
-                "data": bytes_data
-            }
-        ]
-        return image_parts
-    else:
-        return None
+        response = model.generate_content([prompt], stream=True)
     
-# Creating the base prompt
-prompt = """
-Imagine you are a personal chef providing guidance on creating a specific dish. When someone asks you how to make a dish, respond by including:
+    for chunk in response:
+        for letter in chunk.text:
+            yield letter
+            time.sleep(0.01)
 
-Whenever given a dish name (e.g., ‘Spaghetti Carbonara’) followed by quantity, provide a detailed recipe including:
-
-Dish Name: Sure, lets Cook this , Start with the dish name provided.
-Ingredients: List precise quantities for each ingredient based on the given quantity.
-Procedure: Outline a clear, beginner-friendly procedure with steps separated by line breaks.
-Example Input: ‘Spaghetti Carbonara, for 2 people’
-
-Desired Response:
-Dish: Spaghetti Carbonara
-
-Ingredients:
-
-200g spaghetti
-100g pancetta or guanciale, diced
-2 large eggs
-50g grated Parmesan cheese
-1 clove garlic, peeled
-Salt and black pepper, to taste
-
-Procedure:
-
-Step 1 - Cook the Spaghetti: Bring a large pot of salted water to a boil, then add the spaghetti. Cook until al dente, about 8-10 minutes. Reserve a cup of pasta water before draining.
-
-Step 2 - Prepare the Sauce: In a bowl, beat the eggs and mix in the grated Parmesan cheese until smooth. Season with black pepper.
-
-step 3 - Cook the Pancetta: In a large pan, heat a little olive oil over medium heat. Add the garlic clove and cook for 1 minute, then remove it. Add the pancetta and cook until crispy, about 4-5 minutes.
-
-Step 4 - Combine Ingredients: Add the hot, drained spaghetti to the pan with the pancetta. Toss well to combine.
-
-Step 5 - Add the Sauce: Remove the pan from heat, wait a few seconds, then pour the egg and cheese mixture over the pasta, stirring quickly to create a creamy sauce. If needed, add a bit of reserved pasta water to reach your desired consistency.
-
-Step 6 - Serve: Season with additional black pepper, garnish with extra Parmesan, and serve immediately.
-
-Note that the steps should be seperated by the next line 
-Repeat this structure for all dishes, ensuring the response includes clear ingredients and easy-to-follow instructions."
-"""
-
-
-def main():
-    # Setting up Streamlit App (Front-end Setup)
-    # st.set_page_config(page_title="Dishify", page_icon="👨‍🍳")
-
-    # Load and display the logo in the header
-    logo = Image.open("chef.png")
-    st.image(logo, width=100)
-
-    st.header("Dishify - Your Personal Chef, One Chat Away!")
-
-    # Input for text prompt
-    user_input = st.text_input("Enter dish or ingredient query here:", key="user_input")
-
-    # File uploader for uploaded images
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-
-    # Display image if uploaded
+# Function to handle uploaded images
+def image_image_setup(uploaded_file):
     if uploaded_file:
-        image = Image.open(uploaded_file)
-        st.image(image, caption="Uploaded Image", use_column_width=True)
+        bytes_data = uploaded_file.getvalue()
+        return [{"mime_type": uploaded_file.type, "data": bytes_data}]
+    return None
 
-    # Submit button
-    submit = st.button("Generate Recipe")
+# Generate speech from text using gTTS
+def text_to_speech(text):
+    tts = gTTS(text)
+    audio_file = BytesIO()
+    tts.write_to_fp(audio_file)
+    audio_file.seek(0)
+    return audio_file
 
-    # Generate response based on input
-    if submit:
-        if uploaded_file:
-            # Process the image and use both prompt and image to generate response
-            image_data = image_image_setup(uploaded_file)
-            st.session_state.response = get_gemini_response(prompt, image_data)
-        elif user_input:
-            # Use user_input as the prompt if no image is uploaded
-            st.session_state.response = get_gemini_response(user_input)
-        else:
-            st.warning("Please provide either an image or a text query.")
+# Function to animate text highlighting
+def highlight_text(text):
+    words = text.split()
+    num_words = len(words)
+    duration = 8  # Total duration of the audio (adjust as needed)
+    delay = duration / max(num_words, 1)
 
-    # Display the response
-    if st.session_state.get("response"):
-        st.header("The Response is:")
-        st.write(st.session_state.response)
+    for i in range(num_words):
+        highlighted_text = "<p style='font-size:18px; text-align:center;'>"
+        for j, word in enumerate(words):
+            if j == i:
+                highlighted_text += f"<b style='color:#f76b1c; font-size:22px;'>{word}</b> "
+            else:
+                highlighted_text += f"{word} "
+        highlighted_text += "</p>"
+        
+        st.session_state["highlighted_text"] = highlighted_text
+        time.sleep(delay)
 
-    # Background styling with gradient and image
-
+# Function to reapply background styling
+def apply_custom_style():
     page_bg_gradient_with_image = '''
     <style>
     [data-testid="stAppViewContainer"] {
@@ -137,33 +90,97 @@ def main():
         50% { background-position: 100% 50%; }
         100% { background-position: 0% 50%; }
     }
+    [data-testid="stAppViewContainer"] div {
+        background-color: transparent !important;
+    }
     </style>
     '''
-
     st.markdown(page_bg_gradient_with_image, unsafe_allow_html=True)
 
-    # Function to generate speech from text using gTTS
-    def text_to_speech(text):
-        tts = gTTS(text)
-        audio_file = BytesIO()
-        tts.write_to_fp(audio_file)
-        audio_file.seek(0)
-        return audio_file
+def main():
+    # Apply background styling at the start
+    apply_custom_style()
 
-    # Function to play the audio in Streamlit
-    def play_audio(audio_data):
-        audio_bytes = audio_data.read()
+    # Display logo
+    logo = Image.open("chef.png")
+    st.image(logo, width=100)
+    
+    st.header("Dishify - Your Personal Chef, One Chat Away!")
+    
+    # Input for text prompt
+    user_input = st.text_input("Enter dish or ingredient query here:", key="user_input")
+    
+    # File uploader
+    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    
+    # Display uploaded image
+    if uploaded_file:
+        image = Image.open(uploaded_file)
+        st.image(image, caption="Uploaded Image", use_column_width=True)
+    
+    # Submit button
+    submit = st.button("Generate Recipe")
+    
+    if submit:
+        st.session_state["response"] = ""
+        response_container = st.empty()
+
+        if uploaded_file:
+            image_data = image_image_setup(uploaded_file)
+            response_generator = get_gemini_response(user_input, image_data)
+        elif user_input:
+            response_generator = get_gemini_response(user_input)
+        else:
+            st.warning("Please provide either an image or a text query.")
+            return
+
+        response_text = ""
+        for letter in response_generator:
+            response_text += letter
+            response_container.markdown(f"<p style='white-space: pre-wrap;'>{response_text}</p>", unsafe_allow_html=True)
+            apply_custom_style()  # Keep the gradient background
+
+            # **SCROLLING JAVASCRIPT INJECTION**
+            st.markdown(
+                """  
+                <script>
+                var container = window.parent.document.querySelector("section[data-testid='stAppViewContainer']");
+                container.scrollTop = container.scrollHeight;
+                </script>
+                """,
+                unsafe_allow_html=True
+            )
+
+        # Store the generated response
+        st.session_state["response"] = response_text
+
+    # Display stored response
+    if st.session_state["response"]:
+        st.markdown(f"<p style='font-size:18px; white-space: pre-wrap;'>{st.session_state['response']}</p>", unsafe_allow_html=True)
+        apply_custom_style()  # Ensure background stays visible
+
+    # Play DIY button for TTS
+    if st.session_state["response"]:
+        if st.button("🎤 Play The DIY"):
+            st.session_state["audio"] = text_to_speech(st.session_state["response"])
+            st.session_state["play_tts"] = True
+            apply_custom_style()
+
+    # Play audio if available
+    if st.session_state["play_tts"] and st.session_state["audio"]:
+        audio_bytes = st.session_state["audio"].read()
         audio_b64 = base64.b64encode(audio_bytes).decode()
         st.audio(f"data:audio/mp3;base64,{audio_b64}", format="audio/mp3")
 
-    # Only show 'Play DIY' button if response is available
-    if st.session_state.get("response"):
-        if st.button("Play The DIY"):
-            audio_data = text_to_speech(st.session_state.response)
-            play_audio(audio_data)
+        # Start text animation
+        text_animation_thread = threading.Thread(target=highlight_text, args=(st.session_state["response"],))
+        text_animation_thread.start()
+        apply_custom_style()
+
+    # Display highlighted text during TTS
+    if st.session_state["highlighted_text"]:
+        st.markdown(st.session_state["highlighted_text"], unsafe_allow_html=True)
+        apply_custom_style()
 
 if __name__ == "__main__":
     main()
-
-
-

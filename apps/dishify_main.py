@@ -124,7 +124,7 @@ def main():
     if submit:
         st.session_state["response"] = ""
         response_container = st.empty()
-        
+
         if uploaded_file:
             image_data = image_image_setup(uploaded_file)
             response_generator = get_gemini_response(user_input, image_data)
@@ -133,13 +133,24 @@ def main():
         else:
             st.warning("Please provide either an image or a text query.")
             return
-        
+
         response_text = ""
         for letter in response_generator:
             response_text += letter
             response_container.markdown(f"<p style='white-space: pre-wrap;'>{response_text}</p>", unsafe_allow_html=True)
-            apply_custom_style()  # Reapply styling after each update
-        
+            apply_custom_style()  # Keep the gradient background
+
+            # **SCROLLING JAVASCRIPT INJECTION**
+            st.markdown(
+                """  
+                <script>
+                var container = window.parent.document.querySelector("section[data-testid='stAppViewContainer']");
+                container.scrollTop = container.scrollHeight;
+                </script>
+                """,
+                unsafe_allow_html=True
+            )
+
         # Store the generated response
         st.session_state["response"] = response_text
 
