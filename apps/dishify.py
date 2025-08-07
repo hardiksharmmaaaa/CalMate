@@ -102,7 +102,7 @@ def main():
     apply_custom_style()
 
     # Display logo
-    logo = Image.open("chef.png")
+    logo = Image.open("assets/chef.png")
     st.image(logo, width=100)
     
     st.header("Dishify - Your Personal Chef, One Chat Away!")

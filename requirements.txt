@@ -1,9 +1,5 @@
 python-dotenv
-streamlit 
+streamlit
 gtts
-<<<<<<< HEAD
-google.generativeai
-=======
-google.generativeai
-openai
->>>>>>> 717cab16 (Commit changes)
+google-generativeai
+pillow
